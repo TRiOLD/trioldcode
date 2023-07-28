@@ -59,6 +59,7 @@ namespace TRiOLD
         void resize(std::size_t M, std::size_t N, const T& value);
 
         bool isEmpty() const;
+        bool isSquare() const;
         std::size_t getM() const;
         std::size_t getN() const;
         void getSize(std::size_t &M, std::size_t &N) const;
@@ -309,6 +310,12 @@ namespace TRiOLD
     }
 
     template<typename T>
+    bool Matrix<T>::isSquare() const
+    {
+        return m_M == m_N;
+    }
+
+    template<typename T>
     std::size_t Matrix<T>::getM() const
     {
         return m_M;
@@ -396,9 +403,79 @@ namespace TRiOLD
     }
 
     template<typename T>
-    Matrix<T> Matrix<T>::inverse(const Matrix<T>& matrix)
+    Matrix<T> Matrix<T>::inverse(const Matrix<T>& matrix) // by fullGauss method
     {
+        if(matrix.isEmpty())
+            return Matrix<T>();
 
+        std::size_t N = matrix.getN();
+        if(!matrix.isSquare())
+            throw std::runtime_error("Matrix is ​​not square");
+        if(N > 100)
+            throw std::runtime_error("Matrix is ​​too big");
+
+        Matrix<T> res(N, N, 0);
+        Matrix<T> temp = matrix;
+        for(std::size_t i = 0; i < N; ++i)
+            res[i][i] = 1.0;
+
+        for(std::size_t r = 0; r < N; ++r)
+            if(temp[r][r])
+            {
+                T norm = temp[r][r];
+                for(std::size_t c = 0; c < N; ++c)
+                {
+                    temp[r][c] /= norm;
+                    res[r][c] /= norm;
+                }
+                for(std::size_t q = r + 1; q < N; ++q)
+                {
+                    norm = temp[q][r];
+                    if(norm)
+                        for(std::size_t p = 0; p < N; ++p)
+                        {
+                            temp[q][p] -= temp[r][p] * norm;
+                            res[q][p] -= res[r][p] * norm;
+                        }
+                }
+                for(int q = r - 1; q >= 0; --q)
+                {
+                    norm = temp[q][r];
+                    if(norm)
+                        for(std::size_t p = 0; p < N; ++p)
+                        {
+                            temp[q][p] -= temp[r][p] * norm;
+                            res[q][p] -= res[r][p] * norm;
+                        }
+                }
+            }
+            else
+            {
+                bool isDegenerate = true;
+                for(std::size_t m = r; m < N; ++m)
+                    if(matrix[m][r])
+                    {
+                        T* buffRow1 = new T[N];
+                        T* buffRow2 = new T[N];
+                        for(std::size_t n = 0; n < N; ++n)
+                        {
+                            buffRow1[n] = temp[m][n];
+                            buffRow2[n] = res[m][n];
+                            temp[m][n] = temp[r][n];
+                            res[m][n] = res[r][n];
+                            temp[r][n] = buffRow1[n];
+                            res[r][n] = buffRow2[n];
+                        }
+                        delete [] buffRow1;
+                        delete [] buffRow2;
+                        isDegenerate = false;
+                        break;
+                    }
+                if(isDegenerate)
+                    throw std::runtime_error("Matrix is degenerate");
+                r--;
+            }
+        return std::move(res);
     }
 
     template<typename T>
