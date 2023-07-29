@@ -379,15 +379,50 @@ namespace TRiOLD
     }
 
     template<typename T>
-    T Matrix<T>::getcalcDet() const
+    T Matrix<T>::getcalcDet() const // Gauss algorithm
     {
+        if(isEmpty())
+            return 0;
 
+        if(!isSquare())
+            throw std::runtime_error("Matrix is ​​not square");
+
+        T res = 1;
+        for(std::size_t i = 0; i < m_N; ++i)
+        {
+            std::size_t k = i;
+            for(std::size_t j = i+1; j < m_N; ++j)
+                if(std::abs(m_data[j][i]) > std::abs(m_data[k][i]))
+                    k = j;
+            if(!m_data[k][i])
+            {
+                res = 0;
+                break;
+            }
+            swap(m_data[i], m_data[k]);
+            if (i != k)
+                res = -res;
+            res *= m_data[i][i];
+            for(std::size_t j = i+1; j < m_N; ++j)
+                m_data[i][j] /= m_data[i][i];
+            for(std::size_t j = 0; j < m_N; ++j)
+                if (j != i && m_data[j][i])
+                    for(std::size_t k=i+1; k < m_N; ++k)
+                        m_data[j][k] -= m_data[i][k] * m_data[j][i];
+        }
+        return res;
     }
 
     template<typename T>
     T Matrix<T>::getcalcTrace() const
     {
+        if(!isSquare())
+            throw std::runtime_error("Matrix is ​​not square");
 
+        T res = 0;
+        for(std::size_t i = 0; i < m_N; ++i)
+            res += m_data[i][i];
+        return res;
     }
 
     template<typename T>
@@ -403,14 +438,15 @@ namespace TRiOLD
     }
 
     template<typename T>
-    Matrix<T> Matrix<T>::inverse(const Matrix<T>& matrix) // by fullGauss method
+    Matrix<T> Matrix<T>::inverse(const Matrix<T>& matrix) // Gauss–Jordan elimination
     {
         if(matrix.isEmpty())
             return Matrix<T>();
 
-        std::size_t N = matrix.getN();
         if(!matrix.isSquare())
             throw std::runtime_error("Matrix is ​​not square");
+
+        std::size_t N = matrix.getN();
         if(N > 100)
             throw std::runtime_error("Matrix is ​​too big");
 
@@ -453,7 +489,7 @@ namespace TRiOLD
             {
                 bool isDegenerate = true;
                 for(std::size_t m = r; m < N; ++m)
-                    if(matrix[m][r])
+                    if(temp[m][r])
                     {
                         T* buffRow1 = new T[N];
                         T* buffRow2 = new T[N];
