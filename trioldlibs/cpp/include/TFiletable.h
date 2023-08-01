@@ -66,7 +66,7 @@ namespace TRiOLD
 
         operator bool () const;
         friend Filetable& operator >> (Filetable &table, Row& row);
-        friend Filetable& operator << (Filetable &table, Row& row);
+        friend Filetable& operator << (Filetable &table, const Row& row);
     };
 }
 
@@ -107,7 +107,6 @@ namespace TRiOLD
         virtual ~Token();
 
         Token();
-        Token(bool value);
         Token(int value);
         Token(double value, int precision = -1);
         Token(const std::string& value);

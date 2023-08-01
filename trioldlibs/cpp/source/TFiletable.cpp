@@ -139,7 +139,7 @@ namespace TRiOLD
         return table;
     }
 
-    Filetable& operator << (Filetable &table, Filetable::Row& row)
+    Filetable& operator << (Filetable &table, const Filetable::Row& row)
     {
         table.writeBackRow(row);
         return table;
@@ -230,11 +230,6 @@ namespace TRiOLD
     Filetable::Token::Token()
     {
         m_value = std::string();
-    }
-
-    Filetable::Token::Token(bool value)
-    {
-        setValue(value);
     }
 
     Filetable::Token::Token(int value)
