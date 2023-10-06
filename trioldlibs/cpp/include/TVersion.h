@@ -14,7 +14,6 @@ namespace TRiOLD
 {
     class Version
     {
-    ////////////////////////////////
     public:
         enum Label
         {
@@ -26,9 +25,9 @@ namespace TRiOLD
             FINAL
         };
 
-    ////////////////////////////////
     public:
         virtual ~Version();
+
         Version(unsigned short int major = 0,
                 unsigned short int minor = 0,
                 unsigned short int path = 0,
