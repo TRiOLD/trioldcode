@@ -11,6 +11,12 @@
 ////////////////////////////////////
 namespace TRiOLD
 {
+    Logger LOG;     // global loger
+}
+
+////////////////////////////////////
+namespace TRiOLD
+{
     Logger::~Logger()
     {
 
@@ -90,7 +96,8 @@ namespace TRiOLD
 
         switch(level)
         {
-            case Level::ERROR:      return "EROR! ";
+            case Level::FATAL:      return "FATAL! ";
+            case Level::ERROR:      return "ERROR! ";
             case Level::WARNING:    return "WARNING! ";
             case Level::INFO:       return "INFO. ";
             default:                return std::string();
@@ -138,6 +145,11 @@ namespace TRiOLD
     void Logger::setFlag_isWithTimeMoment(bool flag)
     {
         m_isWithTimeMoment = flag;
+    }
+
+    void Logger::writeFatal(const std::string& message)
+    {
+        write(message, Level::FATAL);
     }
 
     void Logger::writeErr(const std::string& message)
