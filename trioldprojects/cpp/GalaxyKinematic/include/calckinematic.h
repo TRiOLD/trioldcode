@@ -11,7 +11,7 @@
 #include <list>
 
 ////////////////////////////////////
-namespace Kinematic
+namespace CalcKinematic
 {
     ////////////////////////////////
     struct ConfigProcessing

@@ -1,6 +1,6 @@
 ////////////////////////////////////
-#ifndef CATALOG_H
-#define CATALOG_H
+#ifndef CALCCATALOG_H
+#define CALCCATALOG_H
 
 ////////////////////////////////////
 #include "star.h"
@@ -12,7 +12,7 @@
 #include <list>
 
 ////////////////////////////////////
-namespace Catalog
+namespace CalcCatalog
 {
     ////////////////////////////////
     struct ConfigTable
@@ -38,15 +38,22 @@ namespace Catalog
     };
     ////////////////////////////////
 
-    std::list<Star> readCatalog(const std::string& filepath, const ConfigTable& config);
-    std::list<Star> readCatalog_agreedStruct(const std::string& filepath);
-    void writeCatalog_agreedStruct(const std::string& filepath, const std::list<Star>& stars);
+    std::list<Star> readCatalog(
+            const std::string& filepath,
+            const ConfigTable& config);
 
-    void writeCentroids(const std::string& filepath, const std::vector<Centroid>& centroids,
-                        const ConfigConstants& config);
+    std::list<Star> readCatalog_agreedStruct(
+            const std::string& filepath);
 
+    void writeCatalog_agreedStruct(
+            const std::string& filepath,
+            const std::list<Star>& stars);
 
+    void writeCentroids(
+            const std::string& filepath,
+            const std::vector<Centroid>& centroids,
+            const ConfigConstants& config);
 };
 
 ////////////////////////////////////
-#endif // CATALOG_H
+#endif // CALCCATALOG_H

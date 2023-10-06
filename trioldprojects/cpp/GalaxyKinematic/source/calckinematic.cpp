@@ -1,5 +1,5 @@
 ////////////////////////////////////
-#include "kinematic.h"
+#include "calckinematic.h"
 
 #include <iostream>
 #include <algorithm>
@@ -14,6 +14,7 @@
 using namespace alglib;
 
 #include <TException.h>
+#include <TLogger.h>
 using namespace TRiOLD;
 
 ////////////////////////////////////
@@ -57,7 +58,7 @@ void _selectStars(
 }
 
 std::vector<CentroidProcessingData> _dataPreparation(
-        const Kinematic::ConfigProcessing& config,
+        const CalcKinematic::ConfigProcessing& config,
         const std::list<Star>& allStars)
 {
     std::size_t cAmountX = (config.maxX - config.minX) / config.step + 1;
@@ -80,7 +81,6 @@ std::vector<CentroidProcessingData> _dataPreparation(
                     config.minY + config.step * j,
                     config.minZ + config.step * k);
 
-                std::cout << c << " " << t << " " << i << " " << j << " " << k << " " << cAmountX  << " " << cAmountY  << " " << cAmountZ << " " << cetroidsAmount << std::endl;
                 threads.at(t) = std::thread(
                     _calcStarsAmount, std::ref(res.at(c).localStarsAmount), std::cref(allStars),
                     std::cref(res.at(c).centroidGCC), config.starsRegionRadius);
@@ -96,7 +96,6 @@ std::vector<CentroidProcessingData> _dataPreparation(
                 }
             }
 
-    std::cout << "Done." << std::endl;
     std::sort(res.begin(), res.end(),
         [](const CentroidProcessingData& CPD1, const CentroidProcessingData& CPD2)
         {return (CPD1.localStarsAmount > CPD2.localStarsAmount);});
@@ -153,15 +152,22 @@ void _calcCentroid(
         e += 3;
     }
 
-    ae_int_t info;
-    real_1d_array x;
-    lsfitreport rep;
-    lsfitlinear(y, fmatrix, info, x, rep);
- // real_1d_array errpar = rep.errpar;
- // rmsV = rep.rmserror;
+    try
+    {
+        ae_int_t info;
+        real_1d_array x;
+        lsfitreport rep;
+        lsfitlinear(y, fmatrix, info, x, rep);
+     // real_1d_array errpar = rep.errpar;
+     // rmsV = rep.rmserror;
 
-    centroid = Centroid(CPD.centroidGCC, {-x[0], -x[1], -x[2]}, starsAmount,
-        x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7], x[8], x[9], x[10], x[11]);
+        centroid = Centroid(CPD.centroidGCC, {-x[0], -x[1], -x[2]}, starsAmount,
+            x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7], x[8], x[9], x[10], x[11]);
+    }
+    catch (alglib::ap_error exc)
+    {
+        throw (Exception(exc.msg, -30));
+    }
 }
 
 std::size_t _estimateStartRAM(std::size_t allStarsAmount)
@@ -174,15 +180,13 @@ std::size_t _estimateThreadRAM(std::size_t localStarsSize)
     return std::size_t(localStarsSize / 250.0);
 }
 
-std::vector<Centroid> Kinematic::calcCentroids(
+std::vector<Centroid> CalcKinematic::calcCentroids(
         const std::list<Star>& allStars,
-        const Kinematic::ConfigProcessing& config)
+        const CalcKinematic::ConfigProcessing& config)
 {
-    std::cout << "data Preparation... ";
     std::vector<CentroidProcessingData> CPDs = _dataPreparation(config, allStars);
     std::size_t cetroidsAmount = CPDs.size();
     std::vector<Centroid> res(cetroidsAmount);
-    std::cout << "done. " << cetroidsAmount << std::endl;
 
     std::size_t maxThreadsAmount = config.threadsAmount;
     if(maxThreadsAmount > cetroidsAmount) maxThreadsAmount = cetroidsAmount;
@@ -196,7 +200,6 @@ std::vector<Centroid> Kinematic::calcCentroids(
         bool isRAMoverflow = startRAM+threadsRAM >= config.RAMlimit;
         if(!isRAMoverflow && t < maxThreadsAmount)
         {
-            std::cout << c << " " << t << " " << threadsRAM << std::endl;
             threads.at(t) = std::thread(
                 _calcCentroid, std::ref(res.at(c)), std::cref(CPDs.at(c)),
                 config.starsRegionRadius, std::cref(allStars));
@@ -214,7 +217,6 @@ std::vector<Centroid> Kinematic::calcCentroids(
             for(auto& th : threads)
                 if(th.joinable())
                     th.join();
-            std::cout << "threads joined." << std::endl;
         }
     }
     return res;

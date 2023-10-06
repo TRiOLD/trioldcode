@@ -1,10 +1,11 @@
 ////////////////////////////////////
-#include "catalog.h"
+#include "calccatalog.h"
 
 #include <cmath>
 
 #include <TException.h>
 #include <TFiletable.h>
+#include <TLogger.h>
 using namespace TRiOLD;
 
 ////////////////////////////////////
@@ -13,8 +14,8 @@ double _d2r(double angle)
     return angle / 180.0 * M_PI;
 }
 
-std::list<Star> Catalog::readCatalog(const std::string& filepath,
-                                     const ConfigTable& config)
+std::list<Star> CalcCatalog::readCatalog(const std::string& filepath,
+                                         const ConfigTable& config)
 {
     Filetable file(filepath);
     if(!file.isOpen())
@@ -43,7 +44,7 @@ std::list<Star> Catalog::readCatalog(const std::string& filepath,
     return res;
 }
 
-std::list<Star> Catalog::readCatalog_agreedStruct(const std::string& filepath)
+std::list<Star> CalcCatalog::readCatalog_agreedStruct(const std::string& filepath)
 {
     Filetable file(filepath);
     if(!file.isOpen())
@@ -65,8 +66,8 @@ std::list<Star> Catalog::readCatalog_agreedStruct(const std::string& filepath)
     return res;
 }
 
-void Catalog::writeCatalog_agreedStruct(const std::string& filepath,
-                                        const std::list<Star>& stars)
+void CalcCatalog::writeCatalog_agreedStruct(const std::string& filepath,
+                                            const std::list<Star>& stars)
 {
     Filetable file(filepath, Filetable::OUT, Filetable::CSV);
     if(!file.isOpen())
@@ -89,9 +90,9 @@ void Catalog::writeCatalog_agreedStruct(const std::string& filepath,
 
 ////////////////////////////////////
 
-void Catalog::writeCentroids(const std::string& filepath,
-                             const std::vector<Centroid>& centroids,
-                             const ConfigConstants& config)
+void CalcCatalog::writeCentroids(const std::string& filepath,
+                                 const std::vector<Centroid>& centroids,
+                                 const ConfigConstants& config)
 {
     Filetable file(filepath, Filetable::OUT, Filetable::CSV);
     if(!file.isOpen())
