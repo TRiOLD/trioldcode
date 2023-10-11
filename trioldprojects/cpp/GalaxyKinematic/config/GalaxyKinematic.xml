@@ -2,10 +2,11 @@
 <GalaxyKinematic>
     <Catalog>
         <ConfigTable>
+            <fileType value="0" type="int"/> <!-- 0 = auto, 1 = TSV, 2 = CSV -->
             <isWithHeader value="true" type="bool"/>
             <coordInRad value="false" type="bool"/>
             <!-- Column numbers in the star catalog -->
-            <cn_rta value="100" type="int"/>
+            <cn_ra value="100" type="int"/>
             <cn_de value="1" type="int"/>
             <cn_plx value="2" type="int"/>
             <cn_muRa value="3" type="int"/>
@@ -23,7 +24,7 @@
         <ConfigProcessing>
             <!-- Computer resources -->
             <threadsAmount value="16" type="int"/>
-            <RAMlimit value="16000" type="int" dim="MB"/>
+            <RAMlimit value="16" type="int" dim="GB"/>
             <!-- Coordinate system grid -->
             <minX value="-8.0" type="double" dim="kpc"/>
             <maxX value="8.0" type="double" dim="kpc"/>

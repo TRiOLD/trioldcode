@@ -6,37 +6,29 @@
 
 ////////////////////////////////////
 Centroid::Centroid()
-    :Star(), m_starsAmount(0), m_V0(), m_Mm(), m_Mp()
+    :Star(), m_starsAmount(0), m_V0(), m_Mm(), m_Mp(), m_KPsErr()
 {
+
 }
 
 Centroid::Centroid(const Cartesian& GCC, const Cartesian& GCV, std::size_t starsAmount,
                    const Cartesian& V0, const Matrix<double>& M)
-    :Star(GCC, GCV), m_starsAmount(starsAmount), m_V0(V0)
+    :Star(GCC, GCV), m_starsAmount(starsAmount), m_V0(V0), m_KPsErr()
 {
     _expandTensor(m_Mm, m_Mp, M);
 }
 
 Centroid::Centroid(const Cartesian& GCC, const Cartesian& GCV, std::size_t starsAmount,
                    const Cartesian& V0, const Matrix<double>& Mm, const Matrix<double>& Mp)
-    :Star(GCC, GCV), m_starsAmount(starsAmount), m_V0(V0), m_Mm(Mm), m_Mp(Mp)
+    :Star(GCC, GCV), m_starsAmount(starsAmount), m_V0(V0), m_Mm(Mm), m_Mp(Mp), m_KPsErr()
 {
 }
 
 Centroid::Centroid(const Cartesian& GCC, const Cartesian& GCV, std::size_t starsAmount,
-                   double u, double v, double w, double w1, double w2, double w3,
-                   double mp12, double mp23, double mp13, double mp11, double mp22, double mp33)
-    :Star(GCC, GCV), m_starsAmount(starsAmount)
+                   const KinematicParameters& KPs)
+    :Star(GCC, GCV), m_starsAmount(starsAmount), m_KPsErr()
 {
-    m_V0 = Cartesian(u,v,w);
-    m_Mm = Matrix<double>(
-        0.0, -w3, w2,
-        w3, 0.0, -w1,
-       -w2, w1, 0.0);
-    m_Mp = Matrix<double>(
-        mp11, mp12, mp13,
-        mp12, mp22, mp23,
-        mp13, mp23, mp33);
+    _expandKPs(m_V0, m_Mm, m_Mp, KPs);
 }
 
 std::size_t Centroid::getStarsAmount() const
@@ -64,16 +56,6 @@ Matrix<double> Centroid::getcalcM() const
     return m_Mm + m_Mp;
 }
 
-void Centroid::getKP(
-    double& u, double& v, double& w, double& w1, double& w2, double& w3,
-        double& mp12, double& mp23, double& mp13, double& mp11, double& mp22, double& mp33) const
-{
-    u = m_V0.x; v = m_V0.y; w = m_V0.z;
-    w1 = m_Mm[2][1]; w2 = m_Mm[0][2]; w3 = m_Mm[1][0];
-    mp12 = m_Mp[0][1]; mp23 = m_Mp[1][2]; mp13 = m_Mp[0][2];
-    mp11 = m_Mp[0][0]; mp22 = m_Mp[1][1]; mp33 = m_Mp[2][2];
-}
-
 Star::Cartesian Centroid::getcalcV0_localRot(double R_Sun) const
 {
     return _rotateVector(m_V0, _calcRotAngleXY(R_Sun, m_GCC));
@@ -94,6 +76,29 @@ Matrix<double> Centroid::getcalcM_localRot(double R_Sun) const
     return _rotateMatrix(m_Mm+m_Mp, _calcRotAngleXY(R_Sun, m_GCC));
 }
 
+Centroid::KinematicParameters Centroid::getKPs() const
+{
+    return _toKPs(m_V0, m_Mm, m_Mp);
+}
+
+Centroid::KinematicParameters Centroid::getcalcKPs_localRot(double R_Sun) const
+{
+    Cartesian V0 = getcalcV0_localRot(R_Sun);
+    Matrix<double> Mm = getcalcMm_localRot(R_Sun);
+    Matrix<double> Mp = getcalcMp_localRot(R_Sun);
+    return _toKPs(V0, Mm, Mp);
+}
+
+Centroid::KinematicParameters Centroid::getKPsErr() const
+{
+    return m_KPsErr;
+}
+
+void Centroid::setKPsErr(const KinematicParameters& KPsErr)
+{
+    m_KPsErr = KPsErr;
+}
+
 void Centroid::_expandTensor(Matrix<double>& Mm, Matrix<double>& Mp, const Matrix<double>& M)
 {
     Mp = Matrix<double>(
@@ -101,6 +106,26 @@ void Centroid::_expandTensor(Matrix<double>& Mm, Matrix<double>& Mp, const Matri
         0.5*(M[0][1]+M[1][0]), M[1][1], 0.5*(M[1][2]+M[2][1]),
         0.5*(M[0][2]+M[2][0]), 0.5*(M[1][2]+M[2][1]), M[2][2]);
     Mm = M - Mp;
+}
+
+void Centroid::_expandKPs(Cartesian& V0, Matrix<double>& Mm, Matrix<double>& Mp, const KinematicParameters& KPs)
+{
+    V0 = Cartesian(KPs.u, KPs.v, KPs.w);
+    Mm = Matrix<double>(
+        0.0, -KPs.w3, KPs.w2,
+        KPs.w3, 0.0, -KPs.w1,
+       -KPs.w2, KPs.w1, 0.0);
+    Mp = Matrix<double>(
+        KPs.mp11, KPs.mp12, KPs.mp13,
+        KPs.mp12, KPs.mp22, KPs.mp23,
+        KPs.mp13, KPs.mp23, KPs.mp33);
+}
+
+Centroid::KinematicParameters Centroid::_toKPs(const Cartesian& V0, const Matrix<double>& Mm, const Matrix<double>& Mp)
+{
+    return KinematicParameters(
+        V0.x, V0.y, V0.z, Mm[2][1], Mm[0][2], Mm[1][0],
+        Mp[0][1], Mp[1][2], Mp[0][2], Mp[0][0], Mp[1][1], Mp[2][2]);
 }
 
 Matrix<double> Centroid::_rotateMatrix(const Matrix<double>& matrix, double angleXY)

@@ -158,11 +158,12 @@ void _calcCentroid(
         real_1d_array x;
         lsfitreport rep;
         lsfitlinear(y, fmatrix, info, x, rep);
-     // real_1d_array errpar = rep.errpar;
-     // rmsV = rep.rmserror;
+        real_1d_array e = rep.errpar;
 
         centroid = Centroid(CPD.centroidGCC, {-x[0], -x[1], -x[2]}, starsAmount,
-            x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7], x[8], x[9], x[10], x[11]);
+            {x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7], x[8], x[9], x[10], x[11]});
+        centroid.setKPsErr(
+            {e[0], e[1], e[2], e[3], e[4], e[5], e[6], e[7], e[8], e[9], e[10], e[11]});
     }
     catch (alglib::ap_error exc)
     {

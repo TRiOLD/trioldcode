@@ -45,6 +45,10 @@ bool ConfigLoader::load(CalcCatalog::ConfigTable& config, const std::string& xml
         return false;
 
     xml_node param;
+    param = configNode.child("fileType");
+    if(_check(param, "int"))
+        config.fileType = param.attribute("value").as_int();
+
     param = configNode.child("isWithHeader");
     if(_check(param, "bool"))
         config.isWithHeader = param.attribute("value").as_bool();
@@ -126,8 +130,10 @@ bool ConfigLoader::load(CalcKinematic::ConfigProcessing& config, const std::stri
         config.threadsAmount = param.attribute("value").as_int();
 
     param = configNode.child("RAMlimit");
-    if(_check(param, "int"))
+    if(_check(param, "int", "MB"))
         config.RAMlimit = param.attribute("value").as_int();
+    if(_check(param, "int", "GB"))
+        config.RAMlimit = param.attribute("value").as_int()*1024;
 
     param = configNode.child("minX");
     if(_check(param, "double", "kpc"))

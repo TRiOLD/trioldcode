@@ -17,7 +17,14 @@ double _d2r(double angle)
 std::list<Star> CalcCatalog::readCatalog(const std::string& filepath,
                                          const ConfigTable& config)
 {
-    Filetable file(filepath);
+    Filetable file;
+    switch (config.fileType)
+    {
+        case 1: file.open(filepath, Filetable::IN, Filetable::TSV); break;
+        case 2: file.open(filepath, Filetable::IN, Filetable::CSV); break;
+        default: file.open(filepath);
+    }
+
     if(!file.isOpen())
         Exception("Catalog::readCatalog() !file.isOpen()");
 
@@ -104,10 +111,21 @@ void CalcCatalog::writeCentroids(const std::string& filepath,
         {"VX[km/s]"}, {"VY[km/s]"}, {"VZ[km/s]"},
         {"R[kpc]"}, {"theta[rad]"}, {"Z[kpc]"},
         {"VR[km/s]"}, {"Vtheta[km/s]"}, {"VZ[km/s]"},
+
         {"u[km/s]"}, {"v[km/s]"}, {"w[km/s]"},
         {"w1[km/s/kpc]"}, {"w2[km/s/kpc]"}, {"w3[km/s/kpc]"},
         {"mp12[km/s/kpc]"}, {"mp23[km/s/kpc]"}, {"mp13[km/s/kpc]"},
-        {"mp11[km/s/kpc]"}, {"mp22[km/s/kpc]"}, {"mp33[km/s/kpc]"}});
+        {"mp11[km/s/kpc]"}, {"mp22[km/s/kpc]"}, {"mp33[km/s/kpc]"},
+
+        {"u_err[km/s]"}, {"v_err[km/s]"}, {"w_err[km/s]"},
+        {"w1_err[km/s/kpc]"}, {"w2_err[km/s/kpc]"}, {"w3_err[km/s/kpc]"},
+        {"mp12_err[km/s/kpc]"}, {"mp23_err[km/s/kpc]"}, {"mp13_err[km/s/kpc]"},
+        {"mp11_err[km/s/kpc]"}, {"mp22_err[km/s/kpc]"}, {"mp33_err[km/s/kpc]"},
+
+        {"u_rot[km/s]"}, {"v_rot[km/s]"}, {"w_rot[km/s]"},
+        {"w1_rot[km/s/kpc]"}, {"w2_rot[km/s/kpc]"}, {"w3_rot[km/s/kpc]"},
+        {"mp12_rot[km/s/kpc]"}, {"mp23_rot[km/s/kpc]"}, {"mp13_rot[km/s/kpc]"},
+        {"mp11_rot[km/s/kpc]"}, {"mp22_rot[km/s/kpc]"}, {"mp33_rot[km/s/kpc]"}});
 
     for(const auto &it : centroids)
     {
@@ -116,8 +134,9 @@ void CalcCatalog::writeCentroids(const std::string& filepath,
         Centroid::Cylindrical GCCC, GCCV;
         it.getcalcGCCCandV(GCCC, GCCV,
             config.R_Sun, {config.VX_Sun, config.VY_Sun, config.VZ_Sun});
-        double u, v, w, w1, w2, w3, mp12, mp23, mp13, mp11, mp22, mp33;
-        it.getKP(u, v, w, w1, w2, w3, mp12, mp23, mp13, mp11, mp22, mp33);
+        Centroid::KinematicParameters KPs = it.getKPs();
+        Centroid::KinematicParameters KPsErr = it.getKPsErr();
+        Centroid::KinematicParameters KPsRot = it.getcalcKPs_localRot(config.R_Sun);
 
         const int p = 12; // precision
         file << Filetable::Row({
@@ -126,10 +145,21 @@ void CalcCatalog::writeCentroids(const std::string& filepath,
             {GCV.x, p}, {GCV.y, p}, {GCV.z, p},
             {GCCC.R, p}, {GCCC.theta, p}, {GCCC.Z, p},
             {GCCV.R, p}, {GCCV.theta, p}, {GCCV.Z, p},
-            {u, p}, {v, p}, {w, p},
-            {w1, p}, {w2, p}, {w3, p},
-            {mp12, p}, {mp23, p}, {mp13, p},
-            {mp11, p}, {mp22, p}, {mp33, p}});
+
+            {KPs.u, p}, {KPs.v, p}, {KPs.w, p},
+            {KPs.w1, p}, {KPs.w2, p}, {KPs.w3, p},
+            {KPs.mp12, p}, {KPs.mp23, p}, {KPs.mp13, p},
+            {KPs.mp11, p}, {KPs.mp22, p}, {KPs.mp33, p},
+
+            {KPsErr.u, p}, {KPsErr.v, p}, {KPsErr.w, p},
+            {KPsErr.w1, p}, {KPsErr.w2, p}, {KPsErr.w3, p},
+            {KPsErr.mp12, p}, {KPsErr.mp23, p}, {KPsErr.mp13, p},
+            {KPsErr.mp11, p}, {KPsErr.mp22, p}, {KPsErr.mp33, p},
+
+            {KPsRot.u, p}, {KPsRot.v, p}, {KPsRot.w, p},
+            {KPsRot.w1, p}, {KPsRot.w2, p}, {KPsRot.w3, p},
+            {KPsRot.mp12, p}, {KPsRot.mp23, p}, {KPsRot.mp13, p},
+            {KPsRot.mp11, p}, {KPsRot.mp22, p}, {KPsRot.mp33, p}});
     }
     file.close();
 }

@@ -17,6 +17,7 @@ namespace CalcCatalog
     ////////////////////////////////
     struct ConfigTable
     {
+        int fileType = 0; // 0 = auto, 1 = TSV, 2 = CSV
         bool isWithHeader = true;
         bool coordInRad = false;
 
