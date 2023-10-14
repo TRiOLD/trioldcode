@@ -20,7 +20,7 @@ using namespace TRiOLD;
 void Program::_setup()
 {
     m_prgname = "Galaxy Kinematic";
-    m_prgversion = Version(1, 1, 0, Version::BETA).toString(true);
+    m_prgversion = Version(1, 1, 2, Version::BETA).toString(true);
     m_argvs = Argvs();
 }
 
