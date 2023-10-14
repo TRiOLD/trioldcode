@@ -76,8 +76,8 @@ void Star::getcalcGCCCandV(Cylindrical& GCCC, Cylindrical& GCCV, double R_Sun, c
     GCV_abs.x = m_GCV.x - GCV_Sun.x;
     GCV_abs.y = m_GCV.y - GCV_Sun.y;
     GCV_abs.z = m_GCV.z - GCV_Sun.z;
-    GCCV.R = GCV_abs.x * std::cos(GCCC.theta) + GCV_abs.y * std::sin(GCCC.theta);
-    GCCV.theta = -GCV_abs.x * std::sin(GCCC.theta) + GCV_abs.y * std::cos(GCCC.theta);
+    GCCV.R = GCV_abs.x * std::cos(GCCC.theta) - GCV_abs.y * std::sin(GCCC.theta);
+    GCCV.theta = GCV_abs.x * std::sin(GCCC.theta) + GCV_abs.y * std::cos(GCCC.theta);
     GCCV.Z = GCV_abs.z;
 }
 

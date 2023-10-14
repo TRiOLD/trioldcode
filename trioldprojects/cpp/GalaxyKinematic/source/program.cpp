@@ -125,7 +125,7 @@ void Program::_parseArguments(int argc, char** argv)
 
 void Program::_initLogger()
 {
-    LOG.setLevel(Logger::Level::WARNING);
+    LOG.setLevel(Logger::Level::INFO);
     LOG.setFlag_isWithCout(m_argvs.isWithConsoleLog);
     if(!m_argvs.logFilePath.empty())
         LOG.setFilepath(m_argvs.logFilePath);
