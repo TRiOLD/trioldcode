@@ -6,7 +6,7 @@
 
 ////////////////////////////////////
 Centroid::Centroid()
-    :Star(), m_starsAmount(0), m_V0(), m_Mm(), m_Mp(), m_KPsErr()
+    :Star(), m_starsAmount(0), m_V0(), m_Mm(3), m_Mp(3), m_KPsErr()
 {
 
 }

@@ -84,7 +84,7 @@ void CalcCatalog::writeCatalog_agreedStruct(const std::string& filepath,
         {"X[kpc]"}, {"Y[kpc]"}, {"Z[kpc]"},
         {"VX[km/s]"}, {"VY[km/s]"}, {"VZ[km/s]"}});
 
-    for(const auto &it : stars)
+    for(const auto& it : stars)
     {
         Star::Cartesian GCC = it.getGCC();
         Star::Cartesian GCV = it.getGCV();
@@ -127,7 +127,7 @@ void CalcCatalog::writeCentroids(const std::string& filepath,
         {"mp12_rot[km/s/kpc]"}, {"mp23_rot[km/s/kpc]"}, {"mp13_rot[km/s/kpc]"},
         {"mp11_rot[km/s/kpc]"}, {"mp22_rot[km/s/kpc]"}, {"mp33_rot[km/s/kpc]"}});
 
-    for(const auto &it : centroids)
+    for(const auto& it : centroids)
     {
         Centroid::Cartesian GCC = it.getGCC();
         Centroid::Cartesian GCV = it.getGCV();

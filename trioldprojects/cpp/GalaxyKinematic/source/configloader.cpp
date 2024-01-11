@@ -40,7 +40,7 @@ bool ConfigLoader::load(CalcCatalog::ConfigTable& config, const std::string& xml
     if (!doc.load_file(xmlpath.c_str()))
         return false;
 
-    xml_node configNode = doc.child("GalaxyKinematic").child("Catalog").child("configNode");
+    xml_node configNode = doc.child("GalaxyKinematic").child("Catalog").child("ConfigTable");
     if(!configNode)
         return false;
 

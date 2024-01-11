@@ -114,6 +114,11 @@ void _createVariables( // by O-M kinematic model (GC)
     };
 }
 
+Centroid _initNoCalcCentroid(const CentroidProcessingData& CPD)
+{
+    return Centroid(CPD.centroidGCC, {}, CPD.localStarsAmount, {}, Matrix<double>(3));
+}
+
 void _calcCentroid(
         Centroid& centroid,
         const CentroidProcessingData& CPD,
@@ -123,7 +128,7 @@ void _calcCentroid(
     unsigned int starsAmount = CPD.localStarsAmount;
     if(starsAmount < 4)
     {
-        centroid = Centroid();
+        centroid = _initNoCalcCentroid(CPD);
         return;
     }
 
@@ -167,6 +172,7 @@ void _calcCentroid(
     }
     catch (alglib::ap_error exc)
     {
+        centroid = _initNoCalcCentroid(CPD);
         throw (Exception(exc.msg, -30));
     }
 }

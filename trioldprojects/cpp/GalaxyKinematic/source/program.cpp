@@ -20,7 +20,7 @@ using namespace TRiOLD;
 void Program::_setup()
 {
     m_prgname = "Galaxy Kinematic";
-    m_prgversion = Version(1, 1, 2, Version::BETA).toString(true);
+    m_prgversion = Version(1, 1, 3, Version::BETA).toString(true);
     m_argvs = Argvs();
 }
 
@@ -196,7 +196,7 @@ void Program::_process_calcKinematic()
     std::list<Star> stars;
     if(m_argvs.inFileStructIsAgreed)
     {
-        LOG.writeInfo("Start reading input star catalog...");
+        LOG.writeInfo("Start reading input star catalog (agreed struct)...");
         LOG.writeInfo("FilePath: " + m_argvs.inFilePath);
         stars = CalcCatalog::readCatalog_agreedStruct(m_argvs.inFilePath);
     }
