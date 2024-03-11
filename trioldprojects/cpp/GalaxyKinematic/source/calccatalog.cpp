@@ -2,6 +2,8 @@
 #include "calccatalog.h"
 
 #include <cmath>
+#include <vector>
+//#include <thread>
 
 #include <TException.h>
 #include <TFiletable.h>
@@ -70,6 +72,58 @@ std::list<Star> CalcCatalog::readCatalog_agreedStruct(const std::string& filepat
         res.push_back({GCC, GCV});
     }
     file.close();
+    return res;
+}
+
+std::list<Star> CalcCatalog::createPixCatalog_agreedStruct(const std::list<Star> &stars,
+                                                           const ConfigPixelization& config)
+{
+    unsigned int areaSizeX = (config.maxX - config.minX) / (config.pixelHalfWidth * 2.0) + 1;
+    unsigned int areaSizeY = (config.maxY - config.minY) / (config.pixelHalfWidth * 2.0) + 1;
+    unsigned int areaSizeZ = (config.maxZ - config.minZ) / (config.pixelHalfWidth * 2.0) + 1;
+
+    typedef std::list<Star::Cartesian> PixelV;
+    typedef std::vector<PixelV> PixelsVoX;
+    typedef std::vector<std::vector<PixelV>> PixelsVXoY;
+    typedef std::vector<std::vector<std::vector<PixelV>>> PixelsV3D;
+
+    PixelsV3D pixelsV(areaSizeZ, PixelsVXoY(areaSizeY, PixelsVoX(areaSizeX)));
+    for(const Star &s : stars) {
+        Star::Cartesian GCC = s.getGCC();
+        if(GCC.x > config.maxX + config.pixelHalfWidth ||
+           GCC.x < config.minX - config.pixelHalfWidth ||
+           GCC.y > config.maxY + config.pixelHalfWidth ||
+           GCC.y < config.minY - config.pixelHalfWidth ||
+           GCC.z > config.maxZ + config.pixelHalfWidth ||
+           GCC.z < config.minZ - config.pixelHalfWidth) {
+            continue;
+        }
+        int i = (GCC.x - config.minX - config.pixelHalfWidth) / (config.pixelHalfWidth * 2.0);
+        int j = (GCC.y - config.minY - config.pixelHalfWidth) / (config.pixelHalfWidth * 2.0);
+        int k = (GCC.z - config.minZ - config.pixelHalfWidth) / (config.pixelHalfWidth * 2.0);
+        pixelsV.at(k).at(j).at(i).push_back(s.getGCV());
+    }
+
+    std::list<Star> res;
+    for(unsigned int k = 0; k < areaSizeZ; ++k) {
+        for(unsigned int j = 0; j < areaSizeY; ++j) {
+            for(unsigned int i = 0; i < areaSizeX; ++i) {
+                const PixelV &pixelV = pixelsV.at(k).at(j).at(i);
+                if(pixelV.size() >= config.minStarCount) {
+                    Star::Cartesian averV;
+                    for(const Star::Cartesian &subv : pixelV) {
+                        averV.x += subv.x / (double)pixelV.size();
+                        averV.y += subv.y / (double)pixelV.size();
+                        averV.z += subv.z / (double)pixelV.size();
+                    }
+                    double X = (double)i * config.pixelHalfWidth * 2.0 + config.minX;
+                    double Y = (double)j * config.pixelHalfWidth * 2.0 + config.minY;
+                    double Z = (double)k * config.pixelHalfWidth * 2.0 + config.minZ;
+                    res.push_back(Star(Star::Cartesian(X, Y, Z), averV));
+                }
+            }
+        }
+    }
     return res;
 }
 

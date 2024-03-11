@@ -13,6 +13,7 @@ namespace ConfigLoader
 {
     bool load(CalcCatalog::ConfigTable &config, const std::string &xmlpath);
     bool load(CalcCatalog::ConfigConstants &config, const std::string &xmlpath);
+    bool load(CalcCatalog::ConfigPixelization &config, const std::string &xmlpath);
     bool load(CalcKinematic::ConfigProcessing &config, const std::string &xmlpath);
 };
 

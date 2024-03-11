@@ -20,7 +20,7 @@ using namespace TRiOLD;
 void Program::_setup()
 {
     m_prgname = "Galaxy Kinematic";
-    m_prgversion = Version(1, 1, 3, Version::BETA).toString(true);
+    m_prgversion = Version(1, 2, 0, Version::BETA).toString(true);
     m_argvs = Argvs();
 }
 
@@ -60,6 +60,12 @@ void Program::_parseArguments(int argc, char** argv)
            arguments.at(i).compare("--catalog") == 0)
         {
             m_argvs.processType = ProcessType::CRTSTRUCTCATALOG;
+            continue;
+        }
+        if(arguments.at(i).compare("--crtpixelstructcatalog") == 0 ||
+           arguments.at(i).compare("--pixcatalog") == 0)
+        {
+            m_argvs.processType = ProcessType::CRTPXLSTRUCTCATALOG;
             continue;
         }
         if(arguments.at(i).compare("--calckinematic") == 0 ||
@@ -148,6 +154,7 @@ void Program::_process_help()
         " --version        - show version" << std::endl <<
         " --help           - show help" << std::endl <<
         " --catalog        - create struct catalog" << std::endl <<
+        " --pixcatalog     - create struct pixels catalog" << std::endl <<
         " --kinematic      - calculate kinematic parameters" << std::endl <<
         ""  << std::endl <<
         "Files path:" << std::endl <<
@@ -185,6 +192,50 @@ void Program::_process_crtStructCatalog()
     LOG.writeInfo("FilePath: " + m_argvs.onFilePath);
     CalcCatalog::writeCatalog_agreedStruct(m_argvs.onFilePath, stars);
     LOG.writeInfo("Result struct star catalog has been written.");
+
+    LOG.writeInfo("The process is completed.");
+}
+
+void Program::_process_crtPxlStructCatalog()
+{
+    LOG.writeInfo("Start process: calculate kinematic parameters.");
+
+    std::list<Star> stars;
+    if(m_argvs.inFileStructIsAgreed)
+    {
+        LOG.writeInfo("Start reading input star catalog (agreed struct)...");
+        LOG.writeInfo("FilePath: " + m_argvs.inFilePath);
+        stars = CalcCatalog::readCatalog_agreedStruct(m_argvs.inFilePath);
+    }
+    else
+    {
+        LOG.writeInfo("Start reading ConfigTable...");
+        LOG.writeInfo("FilePath: " + m_argvs.configPath);
+        CalcCatalog::ConfigTable configTable;
+        ConfigLoader::load(configTable, m_argvs.configPath);
+        LOG.writeInfo("ConfigTable has been loaded.");
+
+        LOG.writeInfo("Start reading input star catalog...");
+        LOG.writeInfo("FilePath: " + m_argvs.inFilePath);
+        stars = CalcCatalog::readCatalog(m_argvs.inFilePath, configTable);
+    }
+    LOG.writeInfo("Star catalog has been loaded. "
+                  "Stars amount = " +std::to_string(stars.size()));
+
+    LOG.writeInfo("Start reading ConfigPixelization...");
+    LOG.writeInfo("FilePath: " + m_argvs.configPath);
+    CalcCatalog::ConfigPixelization configPix;
+    ConfigLoader::load(configPix, m_argvs.configPath);
+    LOG.writeInfo("ConfigPixelization has been loaded.");
+
+    LOG.writeInfo("Start star catalog pixelization...");
+    std::list<Star> pixels = CalcCatalog::createPixCatalog_agreedStruct(stars, configPix);
+    std::string pxLen = std::to_string(pixels.size());
+    LOG.writeInfo("Star catalog has been pixelated. There are " + pxLen + " pixels.");
+    LOG.writeInfo("Start writing result pixelated struct star catalog...");
+    LOG.writeInfo("FilePath: " + m_argvs.onFilePath);
+    CalcCatalog::writeCatalog_agreedStruct(m_argvs.onFilePath, pixels);
+    LOG.writeInfo("Result pixelated struct star catalog has been written.");
 
     LOG.writeInfo("The process is completed.");
 }
@@ -258,6 +309,11 @@ int Program::process()
             case Program::ProcessType::CRTSTRUCTCATALOG:
                 _initLogger();
                 _process_crtStructCatalog();
+            break;
+
+            case Program::ProcessType::CRTPXLSTRUCTCATALOG:
+                _initLogger();
+                _process_crtPxlStructCatalog();
             break;
 
             case Program::ProcessType::CALCKINEMATIC:

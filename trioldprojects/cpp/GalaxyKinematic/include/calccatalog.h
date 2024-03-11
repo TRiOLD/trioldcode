@@ -29,13 +29,25 @@ namespace CalcCatalog
         unsigned int cn_Vr = 5;
     };
 
+    struct ConfigPixelization
+    {
+        double minX = -10.0;                // kpc
+        double maxX =  10.0;                // kpc
+        double minY = -10.0;                // kpc
+        double maxY =  10.0;                // kpc
+        double minZ =  -5.0;                // kpc
+        double maxZ =   5.0;                // kpc
+        double pixelHalfWidth = 0.05; // kpc
+        unsigned int minStarCount = 10;
+    };
+
     struct ConfigConstants
     {
-        double R_Sun =  8.28;           // kpc
+        double R_Sun =  8.28;               // kpc
 
-        double VX_Sun = 11.1;           // km/sec
-        double VY_Sun = 243.13;         // km/sec
-        double VZ_Sun = 8.31;           // km/sec
+        double VX_Sun = 11.1;               // km/sec
+        double VY_Sun = 243.13;             // km/sec
+        double VZ_Sun = 8.31;               // km/sec
     };
     ////////////////////////////////
 
@@ -45,6 +57,10 @@ namespace CalcCatalog
 
     std::list<Star> readCatalog_agreedStruct(
             const std::string& filepath);
+
+    std::list<Star> createPixCatalog_agreedStruct(
+            const std::list<Star>& stars,
+            const ConfigPixelization& config);
 
     void writeCatalog_agreedStruct(
             const std::string& filepath,

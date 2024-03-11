@@ -84,6 +84,52 @@ bool ConfigLoader::load(CalcCatalog::ConfigTable& config, const std::string& xml
     return true;
 }
 
+bool ConfigLoader::load(CalcCatalog::ConfigPixelization &config, const std::string &xmlpath)
+{
+    xml_document doc;
+    if (!doc.load_file(xmlpath.c_str()))
+        return false;
+
+    xml_node configNode = doc.child("GalaxyKinematic").child("Catalog").child("Pixelization");
+    if(!configNode)
+        return false;
+
+    xml_node param;
+    param = configNode.child("minX");
+    if(_check(param, "double", "kpc"))
+        config.minX = param.attribute("value").as_double();
+
+    param = configNode.child("maxX");
+    if(_check(param, "double", "kpc"))
+        config.maxX = param.attribute("value").as_double();
+
+    param = configNode.child("minY");
+    if(_check(param, "double", "kpc"))
+        config.minY = param.attribute("value").as_double();
+
+    param = configNode.child("maxY");
+    if(_check(param, "double", "kpc"))
+        config.maxY = param.attribute("value").as_double();
+
+    param = configNode.child("minZ");
+    if(_check(param, "double", "kpc"))
+        config.minZ = param.attribute("value").as_double();
+
+    param = configNode.child("maxZ");
+    if(_check(param, "double", "kpc"))
+        config.maxZ = param.attribute("value").as_double();
+
+    param = configNode.child("pixelHalfWidth");
+    if(_check(param, "double", "kpc"))
+        config.pixelHalfWidth = param.attribute("value").as_double();
+
+    param = configNode.child("minStarCount");
+    if(_check(param, "int"))
+        config.minStarCount = param.attribute("value").as_int();
+
+    return true;
+}
+
 bool ConfigLoader::load(CalcCatalog::ConfigConstants& config, const std::string& xmlpath)
 {
     xml_document doc;

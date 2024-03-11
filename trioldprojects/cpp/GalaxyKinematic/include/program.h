@@ -17,6 +17,7 @@ public:
         VERSION,            // --version
         HELP,               // --help
         CRTSTRUCTCATALOG,   // --create struct catalog
+        CRTPXLSTRUCTCATALOG,// --create pixel struct catalog
         CALCKINEMATIC       // --calculate kinematic parameters
     };
 
@@ -52,6 +53,7 @@ private:
     void _process_version();
     void _process_help();
     void _process_crtStructCatalog();
+    void _process_crtPxlStructCatalog();
     void _process_calcKinematic();
 
 public:
